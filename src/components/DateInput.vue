@@ -118,10 +118,16 @@ export default {
       }
 
       if (this.typeable) {
-        const typedDate = Date.parse(this.input.value)
-        if (!isNaN(typedDate)) {
-          this.typedDate = this.input.value
-          this.$emit('typedDate', new Date(this.typedDate))
+        const dateString = this.input.value
+        const dateParts = dateString.split('/')
+        if (dateParts.length === 3) {
+          // month is 0-based, that's why we need dataParts[1] - 1
+          let dateObject = new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0])
+          if (dateObject instanceof Date) {
+            console.log(dateObject)
+            this.typedDate = this.input.value
+            this.$emit('typedDate', dateObject)
+          }
         }
       }
     },
@@ -130,12 +136,14 @@ export default {
      * called once the input is blurred
      */
     inputBlurred () {
-      if (this.typeable && isNaN(Date.parse(this.input.value))) {
+      const dateString = this.input.value
+      const dateParts = dateString.split('/')
+      // clear if click away and invalid date
+      if (this.typeable && dateParts.length !== 3) {
         this.clearDate()
         this.input.value = null
         this.typedDate = null
       }
-
       this.$emit('closeCalendar')
     },
     /**
